@@ -125,7 +125,7 @@ typedef char floppy_drive_name[16];
  */
 struct floppy_drive_params {
 	signed char cmos;		/* CMOS type */
-	
+
 	/* Spec2 is (HLD<<1 | ND), where HLD is head load time (1=2ms, 2=4 ms 
 	 * etc) and ND is set means no DMA. Hardcoded to 6 (HLD=6ms, use DMA).
 	 */
@@ -144,12 +144,12 @@ struct floppy_drive_params {
 	unsigned char rps;		/* rotations per second */
 	unsigned char tracks;		/* maximum number of tracks */
 	unsigned long timeout;		/* timeout for interrupt requests */
-	
+
 	unsigned char interleave_sect;	/* if there are more sectors, use 
 					 * interleave */
-	
+
 	struct floppy_max_errors max_errors;
-	
+
 	char flags;			/* various flags, including ftd_msg */
 /*
  * Announce successful media type detection and media information loss after
@@ -172,7 +172,7 @@ struct floppy_drive_params {
  * the disk, the next format is tried. This uses the variable 'probing'.
  */
 	short autodetect[8];		/* autodetected formats */
-	
+
 	int checkfreq; /* how often should the drive be checked for disk 
 			* changes */
 	int native_format; /* native format of this drive */
@@ -220,13 +220,13 @@ struct floppy_drive_struct {
  * decremented after each probe.
  */
 	int keep_data;
-	
+
 	/* Prevent "aliased" accesses. */
 	int fd_ref;
 	int fd_device;
 	unsigned long last_checked; /* when was the drive last checked for a disk 
 			   * change? */
-	
+
 	char *dmabuf;
 	int bufblocks;
 };
@@ -299,13 +299,13 @@ struct floppy_write_errors {
 
 	unsigned int write_errors;  /* number of physical write errors 
 				     * encountered */
-	
+
 	/* position of first and last write errors */
 	unsigned long first_error_sector;
 	int           first_error_generation;
 	unsigned long last_error_sector;
 	int           last_error_generation;
-	
+
 	unsigned int badness; /* highest retry count for a read or write 
 			       * operation */
 };
@@ -376,5 +376,27 @@ struct floppy_raw_cmd {
 
 #define FDEJECT _IO(2, 0x5a)
 /* eject the disk */
+
+
+#ifdef __KERNEL__
+#ifdef CONFIG_COMPAT
+#include <linux/compat.h>
+
+struct compat_floppy_struct {
+	compat_uint_t	size;
+	compat_uint_t	sect;
+	compat_uint_t	head;
+	compat_uint_t	track;
+	compat_uint_t	stretch;
+	unsigned char	gap;
+	unsigned char	rate;
+	unsigned char	spec1;
+	unsigned char	fmt_gap;
+	const compat_caddr_t name;
+};
+
+#define FDGETPRM32 _IOR(2, 0x04, struct compat_floppy_struct)
+#endif
+#endif
 
 #endif

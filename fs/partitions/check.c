@@ -27,7 +27,6 @@
 #include "acorn.h"
 #include "amiga.h"
 #include "atari.h"
-#include "blkdev_parts.h"
 #include "ldm.h"
 #include "mac.h"
 #include "msdos.h"
@@ -39,7 +38,6 @@
 #include "efi.h"
 #include "karma.h"
 #include "sysv68.h"
-#include "rpmb.h"
 
 #ifdef CONFIG_BLK_DEV_MD
 extern void md_autodetect_dev(dev_t dev);
@@ -52,17 +50,6 @@ static int (*check_part[])(struct parsed_partitions *) = {
 	 * Probe partition formats with tables at disk address 0
 	 * that also have an ADFS boot block at 0xdc0.
 	 */
-#ifdef CONFIG_BLKDEV_PARTITION
-	blkdev_partition,
-#endif
-#ifdef CONFIG_RPMB_PARTITION
-	/*
-	 * Must be before any formats which have a partition table so that no
-	 * attempt is made to access replay protected memory block (RPMB)
-	 * partitions.
-	 */
-	rpmb_partition,
-#endif
 #ifdef CONFIG_ACORN_PARTITION_ICS
 	adfspart_check_ICS,
 #endif
@@ -250,22 +237,22 @@ ssize_t part_size_show(struct device *dev,
 	return sprintf(buf, "%llu\n",(unsigned long long)p->nr_sects);
 }
 
-ssize_t part_ro_show(struct device *dev,
-		       struct device_attribute *attr, char *buf)
+static ssize_t part_ro_show(struct device *dev,
+			    struct device_attribute *attr, char *buf)
 {
 	struct hd_struct *p = dev_to_part(dev);
 	return sprintf(buf, "%d\n", p->policy ? 1 : 0);
 }
 
-ssize_t part_alignment_offset_show(struct device *dev,
-				   struct device_attribute *attr, char *buf)
+static ssize_t part_alignment_offset_show(struct device *dev,
+					  struct device_attribute *attr, char *buf)
 {
 	struct hd_struct *p = dev_to_part(dev);
 	return sprintf(buf, "%llu\n", (unsigned long long)p->alignment_offset);
 }
 
-ssize_t part_discard_alignment_show(struct device *dev,
-				   struct device_attribute *attr, char *buf)
+static ssize_t part_discard_alignment_show(struct device *dev,
+					   struct device_attribute *attr, char *buf)
 {
 	struct hd_struct *p = dev_to_part(dev);
 	return sprintf(buf, "%u\n", p->discard_alignment);
